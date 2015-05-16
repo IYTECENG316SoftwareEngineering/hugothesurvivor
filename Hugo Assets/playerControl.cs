@@ -15,6 +15,7 @@ public class playerControl : MonoBehaviour {
 	public float step = 5;
 
 	public float jump=20.0F;
+	public bool isPause=false;
 	GameObject lose;
 	void Start () {
 		camera=GameObject.FindWithTag("MainCamera");
@@ -24,6 +25,7 @@ public class playerControl : MonoBehaviour {
 		end =new Vector3(transform.position.x-20,transform.position.y,transform.position.z);
 		lose = GameObject.FindWithTag ("Lose");
 		lose.SetActive (false);
+
 		
 	}
 	void OnTriggerEnter(Collider other)
@@ -33,10 +35,15 @@ public class playerControl : MonoBehaviour {
 			lose.SetActive (true);
 			StartCoroutine(Lose());
 		}
+		if (other.tag == "win") 
+		{
+			Application.LoadLevel("screenMainMenu");
+		}
+
 	}
 	IEnumerator Lose()
 	{
-		yield return new WaitForSeconds(2);
+		yield return new WaitForSeconds(0.5F);
 		Application.LoadLevel("screenMainMenu");
 	}
 	
@@ -49,7 +56,20 @@ public class playerControl : MonoBehaviour {
 		Vector3 storedVectorMovement = this.transform.position;
 		storedVectorMovement.z -= moveSpeed * Time.deltaTime;
 
+		if (Input.GetButtonDown ("Cancel")) 
+		{
 
+			if(Time.timeScale==0)
+			{
+				Time.timeScale=1;
+				isPause=false;
+			}
+			else
+			{
+				Time.timeScale=0;
+				isPause=true;
+			}
+		}
 		if (controller.isGrounded) 
 		{
 			if(Input.GetButtonDown("Jump"))
@@ -81,5 +101,22 @@ public class playerControl : MonoBehaviour {
 		this.transform.position = storedVectorMovement; // z eksen hareketi
 		//transform.Translate (storedVectorMovement);
 		controller.Move(movement*Time.deltaTime);		// yerçekimi
+	}
+
+	void OnGUI()
+	{
+		if (isPause) 
+		{
+			if (GUI.Button (new Rect (Screen.width * 0.35F, Screen.height * 0.7F, Screen.width * 0.3F, Screen.height * 0.1F), "<size=" + Screen.height * 0.05F + ">Resume</size>")) {
+				Time.timeScale=1;
+				isPause=false;
+			}
+			if(GUI.Button(new Rect(Screen.width*0.35F,Screen.height*0.55F,Screen.width*0.3F,Screen.height*0.1F),"<size="+Screen.height*0.05F+">Main Menu</size>"))
+			{
+				Time.timeScale=1;
+				isPause=false;
+				Application.LoadLevel("screenMainMenu");
+			}
+		}
 	}
 }
